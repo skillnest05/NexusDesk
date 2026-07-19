@@ -31,3 +31,9 @@ uploads/*
 # Temporary / Leftover Files
 phpmailer.zip
 *.tmp
+
+# Debug Files (remove after deployment)
+debug_env.php
+
+# Agents directory
+.agents/
