@@ -11,10 +11,13 @@ if (file_exists($envFile)) {
     $env = parse_ini_file($envFile);
 }
 
-define('DB_HOST', $env['DB_HOST'] ?? 'localhost');
-define('DB_NAME', $env['DB_NAME'] ?? 'support_ticket_system');
-define('DB_USER', $env['DB_USER'] ?? 'root');
-define('DB_PASS', $env['DB_PASS'] ?? '');
+// Railway provides MYSQLHOST, MYSQLPORT, MYSQLDATABASE, MYSQLUSER, MYSQLPASSWORD
+// Check getenv() first (Railway), then .env file, then XAMPP defaults
+define('DB_HOST', getenv('MYSQLHOST') ?: ($env['DB_HOST'] ?? 'localhost'));
+define('DB_PORT', getenv('MYSQLPORT') ?: ($env['DB_PORT'] ?? '3306'));
+define('DB_NAME', getenv('MYSQLDATABASE') ?: ($env['DB_NAME'] ?? 'support_ticket_system'));
+define('DB_USER', getenv('MYSQLUSER') ?: ($env['DB_USER'] ?? 'root'));
+define('DB_PASS', getenv('MYSQLPASSWORD') ?: ($env['DB_PASS'] ?? ''));
 define('DB_CHARSET', $env['DB_CHARSET'] ?? 'utf8mb4');
 
 date_default_timezone_set('Asia/Kolkata');
@@ -27,7 +30,7 @@ function getDbConnection(): PDO {
     static $pdo = null;
     
     if ($pdo === null) {
-        $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
+        $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
         
         $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
