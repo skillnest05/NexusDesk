@@ -21,23 +21,58 @@ header('Content-Type: application/json');
 
 $results = [];
 
+/**
+ * Execute a SQL file statement by statement, ignoring "already exists" errors.
+ */
+function executeSqlFile(PDO $pdo, string $filePath, array &$results): void {
+    $sql = file_get_contents($filePath);
+    $filename = basename($filePath);
+    
+    // Remove SQL comments (lines starting with --)
+    $sql = preg_replace('/^--.*$/m', '', $sql);
+    
+    // Split by semicolons into individual statements
+    $statements = array_filter(array_map('trim', explode(';', $sql)));
+    
+    $success = 0;
+    $skipped = 0;
+    $errors = [];
+    
+    foreach ($statements as $stmt) {
+        if (empty($stmt)) continue;
+        try {
+            $pdo->exec($stmt);
+            $success++;
+        } catch (PDOException $e) {
+            $code = $e->getCode();
+            $msg = $e->getMessage();
+            // Ignore "already exists" type errors (1061=duplicate key, 1050=table exists, 1062=duplicate entry)
+            if (in_array((int)$code, [1061, 1050, 1062]) || 
+                strpos($msg, 'already exists') !== false ||
+                strpos($msg, 'Duplicate') !== false) {
+                $skipped++;
+            } else {
+                $errors[] = $msg;
+            }
+        }
+    }
+    
+    $status = empty($errors) ? 'OK' : 'PARTIAL';
+    $results[] = "{$filename}: {$success} executed, {$skipped} skipped (already exist)" . 
+                 (empty($errors) ? '' : ', ERRORS: ' . implode(' | ', $errors));
+}
+
 try {
     $pdo = getDbConnection();
     
     // ---- Schema: agents, tickets, ticket_attachments, ticket_replies ----
-    $schema = file_get_contents(__DIR__ . '/schema.sql');
-    $pdo->exec($schema);
-    $results[] = 'schema.sql executed successfully';
+    executeSqlFile($pdo, __DIR__ . '/schema.sql', $results);
     
     // ---- Schema: users table ----
-    $usersSchema = file_get_contents(__DIR__ . '/users_schema.sql');
-    $pdo->exec($usersSchema);
-    $results[] = 'users_schema.sql executed successfully';
+    executeSqlFile($pdo, __DIR__ . '/users_schema.sql', $results);
     
     // ---- Seed data ----
-    $seed = file_get_contents(__DIR__ . '/seed.sql');
-    $pdo->exec($seed);
-    $results[] = 'seed.sql executed successfully';
+    executeSqlFile($pdo, __DIR__ . '/seed.sql', $results);
     
     echo json_encode([
         'success' => true,
