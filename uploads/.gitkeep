@@ -1,0 +1,3 @@
+# This directory stores uploaded ticket attachments.
+# Files are organized as /uploads/{ticket_id}/{filename}
+# This file ensures the directory exists in version control.
