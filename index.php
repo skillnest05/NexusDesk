@@ -12,6 +12,9 @@ error_reporting(E_ALL);
 ini_set('display_errors', '0');
 ini_set('log_errors', '1');
 
+// Auto-migrate: create tables + seed admin on first run (safe to repeat)
+require_once __DIR__ . '/config/migrate.php';
+
 // Parse the request URI
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $path = '/' . trim($path, '/');

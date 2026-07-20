@@ -6,6 +6,9 @@
 require_once __DIR__ . '/config/db.php';
 require_once __DIR__ . '/config/session.php';
 
+// Ensure tables + admin exist (safe on repeated calls)
+require_once __DIR__ . '/config/migrate.php';
+
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
 // ---- REGISTER ----

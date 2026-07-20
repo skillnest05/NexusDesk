@@ -18,9 +18,9 @@ if (file_exists($envFile)) {
     $env = parse_ini_file($envFile);
 }
 
-// Fallbacks: getenv() (Railway) -> .env file -> hardcoded defaults
-$gmailUser = getenv('GMAIL_USER') ?: ($env['GMAIL_USER'] ?? 'skillnest05@gmail.com');
-$gmailPass = getenv('GMAIL_APP_PASSWORD') ?: ($env['GMAIL_APP_PASSWORD'] ?? 'YOUR_GOOGLE_APP_PASSWORD_HERE');
+// Fallbacks: getenv() (Railway) -> .env file -> placeholder
+$gmailUser = getenv('GMAIL_USER') ?: ($env['GMAIL_USER'] ?? '');
+$gmailPass = getenv('GMAIL_APP_PASSWORD') ?: ($env['GMAIL_APP_PASSWORD'] ?? '');
 
 define('SMTP_HOST', 'smtp.gmail.com');
 define('SMTP_PORT', 587);

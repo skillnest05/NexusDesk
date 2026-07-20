@@ -1,6 +1,10 @@
-# Environment Variables
+# ==============================
+# NexusDesk .gitignore
+# ==============================
+
+# Environment Variables (CRITICAL — contains passwords & API keys)
 .env
-.env.*
+!.env.example
 
 # Logs
 *.log
@@ -14,6 +18,7 @@ error_log
 .Trashes
 ehthumbs.db
 Thumbs.db
+desktop.ini
 
 # IDE / Editor Files
 .vscode/
@@ -23,17 +28,20 @@ Thumbs.db
 *.njsproj
 *.sln
 *.swp
+*.swo
+*~
 
-# User Uploads
+# User Uploads (keep directory structure)
 uploads/*
 !uploads/.gitkeep
 
-# Temporary / Leftover Files
+# Temporary / Build Files
 phpmailer.zip
 *.tmp
-
-# Debug Files (remove after deployment)
-debug_env.php
+*.bak
 
 # Agents directory
 .agents/
+
+# README backup
+README.md~
