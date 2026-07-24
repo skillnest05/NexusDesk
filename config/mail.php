@@ -1,6 +1,7 @@
 <?php
 /**
  * Mail Configuration using PHPMailer
+ * Uses port 465 (SMTPS/SSL) for cloud deployment compatibility.
  */
 
 // Load PHPMailer classes manually since we didn't use Composer
@@ -18,12 +19,12 @@ if (file_exists($envFile)) {
     $env = parse_ini_file($envFile);
 }
 
-// Fallbacks: getenv() (Railway) -> .env file -> placeholder
+// Fallbacks: getenv() (Railway) -> .env file -> empty
 $gmailUser = getenv('GMAIL_USER') ?: ($env['GMAIL_USER'] ?? '');
 $gmailPass = getenv('GMAIL_APP_PASSWORD') ?: ($env['GMAIL_APP_PASSWORD'] ?? '');
 
 define('SMTP_HOST', 'smtp.gmail.com');
-define('SMTP_PORT', 587);
+define('SMTP_PORT', 465);
 define('SMTP_USER', $gmailUser);
 define('SMTP_PASS', $gmailPass);
 define('SMTP_FROM_EMAIL', $gmailUser);
@@ -38,6 +39,12 @@ define('SMTP_FROM_NAME', 'NexusDesk System');
  * @return bool True on success, False on failure
  */
 function sendSystemEmail($to, $subject, $htmlBody) {
+    // Skip if credentials are not configured
+    if (empty(SMTP_USER) || empty(SMTP_PASS)) {
+        error_log('[NexusDesk Mail] SMTP credentials not configured. Skipping email to: ' . $to);
+        return false;
+    }
+
     $mail = new PHPMailer(true);
 
     try {
@@ -47,15 +54,16 @@ function sendSystemEmail($to, $subject, $htmlBody) {
         $mail->SMTPAuth   = true;
         $mail->Username   = SMTP_USER;
         $mail->Password   = SMTP_PASS;
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;  // SSL on port 465
         $mail->Port       = SMTP_PORT;
+        $mail->Timeout    = 15;
 
-        // Disable SSL certificate verification (useful for XAMPP localhost)
+        // SSL options for cloud environments
         $mail->SMTPOptions = array(
             'ssl' => array(
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-                'allow_self_signed' => true
+                'verify_peer' => true,
+                'verify_peer_name' => true,
+                'allow_self_signed' => false
             )
         );
 
@@ -70,9 +78,10 @@ function sendSystemEmail($to, $subject, $htmlBody) {
         $mail->AltBody = strip_tags($htmlBody);
 
         $mail->send();
+        error_log('[NexusDesk Mail] Email sent successfully to: ' . $to);
         return true;
     } catch (Exception $e) {
-        error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
+        error_log("[NexusDesk Mail] Failed to send to {$to}. Error: {$mail->ErrorInfo}");
         return false;
     }
 }
