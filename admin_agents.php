@@ -49,7 +49,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->execute([$name, $email, $expertise]);
                     
                     $pdo->commit();
-                    $success = "Agent {$name} created successfully!";
                     
                     // Send Welcome Email
                     require_once __DIR__ . '/config/mail.php';
@@ -62,10 +61,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         Email: {$email}<br>
                         Password: {$password}</p>
                         <p>Your expertise category is set to: <b>{$expertise}</b></p>
-                        <p><a href='http://localhost:8000/login.php'>Click here to login</a></p>
                     ";
-                    if (!sendSystemEmail($email, $subject, $body)) {
-                        $error = "Agent created, but failed to send welcome email.";
+                    $mailSent = sendSystemEmail($email, $subject, $body);
+                    
+                    if ($mailSent) {
+                        $success = "Agent <strong>{$name}</strong> created successfully! Welcome email sent to <strong>{$email}</strong>. (Password: <code>" . htmlspecialchars($password) . "</code>)";
+                    } else {
+                        $success = "Agent <strong>{$name}</strong> created successfully!<br><small class='d-block mt-1'>⚠️ Welcome email could not be sent to <strong>{$email}</strong> (Resend testing domain only sends to registered account email). Please copy credentials manually:<br><strong>Email:</strong> {$email} | <strong>Password:</strong> <code>" . htmlspecialchars($password) . "</code></small>";
                     }
                 } catch (Exception $e) {
                     $pdo->rollBack();
