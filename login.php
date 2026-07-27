@@ -290,6 +290,7 @@ unset($_SESSION['auth_errors'], $_SESSION['auth_show_signup'], $_SESSION['auth_f
 
             <div class="auth-footer">
                 Don't have an account? <a href="register.php">Create one now</a>
+                <div class="mt-2 text-muted small">Crafted with ❤️ by <a href="https://skillnest-beige.vercel.app" target="_blank" rel="noopener noreferrer" class="fw-semibold">SKILLNEST</a></div>
             </div>
         </div>
     </div>
