@@ -90,9 +90,9 @@ function runMigrations(): void {
             $envVars = parse_ini_file($envFile);
         }
 
-        $adminEmail    = getenv('ADMIN_EMAIL') ?: ($envVars['ADMIN_EMAIL'] ?? '');
-        $adminPassword = getenv('ADMIN_PASSWORD') ?: ($envVars['ADMIN_PASSWORD'] ?? '');
-        $adminName     = getenv('ADMIN_NAME') ?: ($envVars['ADMIN_NAME'] ?? 'Admin');
+        $adminEmail    = getenv('ADMIN_EMAIL') ?: ($envVars['ADMIN_EMAIL'] ?? 'admin@support.com');
+        $adminPassword = getenv('ADMIN_PASSWORD') ?: ($envVars['ADMIN_PASSWORD'] ?? 'admin123');
+        $adminName     = getenv('ADMIN_NAME') ?: ($envVars['ADMIN_NAME'] ?? 'Admin User');
 
         // Only seed if credentials are provided
         if (!empty($adminEmail) && !empty($adminPassword)) {
