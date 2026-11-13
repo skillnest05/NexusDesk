@@ -108,6 +108,26 @@ function runMigrations(): void {
             }
         }
 
+        // ---- Seed Sample Data if Empty ----
+        $ticketCount = (int)$pdo->query("SELECT COUNT(*) FROM tickets")->fetchColumn();
+        if ($ticketCount === 0) {
+            $seedFile = __DIR__ . '/../seed.sql';
+            if (file_exists($seedFile)) {
+                $sql = file_get_contents($seedFile);
+                $queries = array_filter(array_map('trim', explode(';', $sql)));
+                foreach ($queries as $query) {
+                    if (!empty($query)) {
+                        try {
+                            $pdo->exec($query);
+                        } catch (Throwable $e) {
+                            error_log('[NexusDesk] Seed query error: ' . $e->getMessage());
+                        }
+                    }
+                }
+                error_log('[NexusDesk] Seed data loaded successfully.');
+            }
+        }
+
     } catch (PDOException $e) {
         error_log('[NexusDesk] Migration error: ' . $e->getMessage());
         // Don't crash the app — just log and continue
