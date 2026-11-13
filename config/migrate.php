@@ -108,6 +108,15 @@ function runMigrations(): void {
             }
         }
 
+        // Seed default agent account for queue access
+        $agentStmt = $pdo->prepare('SELECT id FROM users WHERE email = ?');
+        $agentStmt->execute(['sarah.johnson@support.com']);
+        if (!$agentStmt->fetch()) {
+            $agentHash = password_hash('agent123', PASSWORD_BCRYPT);
+            $pdo->prepare("INSERT INTO users (full_name, email, password, role) VALUES ('Sarah Johnson', 'sarah.johnson@support.com', ?, 'agent')")
+                ->execute([$agentHash]);
+        }
+
         // ---- Seed Sample Data if Empty ----
         $ticketCount = (int)$pdo->query("SELECT COUNT(*) FROM tickets")->fetchColumn();
         if ($ticketCount === 0) {
